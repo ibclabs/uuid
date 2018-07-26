@@ -42,7 +42,7 @@ func (uuid *UUID) Scan(src interface{}) error {
 		if len(b) == 16 {
 			*uuid = UUID(b)
 		} else {
-			u := Parse(string(b))
+			u := ParseBytes(b)
 
 			if u == nil {
 				return errors.New("Scan: invalid UUID format")

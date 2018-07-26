@@ -48,6 +48,8 @@ const (
 
 var rander = rand.Reader // random function
 
+var ranger = [16]int{0, 2, 4, 6, 9, 11, 14, 16, 19, 21, 24, 26, 28, 30, 32, 34}
+
 // New returns a new random (version 4) UUID as a string.  It is a convenience
 // function for NewRandom().String().
 func New() string {
@@ -70,13 +72,26 @@ func Parse(s string) UUID {
 		return nil
 	}
 	var uuid [16]byte
-	for i, x := range [16]int{
-		0, 2, 4, 6,
-		9, 11,
-		14, 16,
-		19, 21,
-		24, 26, 28, 30, 32, 34} {
-		if v, ok := xtob(s[x:]); !ok {
+	for i, x := range ranger {
+		if v, ok := xtob(s[x], s[x+1]); !ok {
+			return nil
+		} else {
+			uuid[i] = v
+		}
+	}
+	return uuid[:]
+}
+
+func ParseBytes(s []byte) UUID {
+	if len(s) != 36 {
+		return nil
+	}
+	if s[8] != 45 || s[13] != 45 || s[18] != 45 || s[23] != 45 {
+		return nil
+	}
+	var uuid [16]byte
+	for i, x := range ranger {
+		if v, ok := xtob(s[x], s[x+1]); !ok {
 			return nil
 		} else {
 			uuid[i] = v
