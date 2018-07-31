@@ -2,49 +2,47 @@ package uuid
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 )
 
-func (uuid UUID) Marshal() ([]byte, error) {
-	if len(uuid) == 0 {
+func (u UUID) Marshal() ([]byte, error) {
+	if len(u) == 0 {
 		return nil, nil
 	}
-	return []byte(uuid), nil
+	return []byte(u), nil
 }
 
-func (uuid UUID) MarshalTo(data []byte) (n int, err error) {
-	if len(uuid) == 0 {
+func (u UUID) MarshalTo(data []byte) (n int, err error) {
+	if len(u) == 0 {
 		return 0, nil
 	}
-	copy(data, uuid)
+	copy(data, u)
 	return 16, nil
 }
 
-func (uuid *UUID) Unmarshal(data []byte) error {
+func (u *UUID) Unmarshal(data []byte) error {
 	if len(data) == 0 {
-		uuid = nil
 		return nil
 	}
 	id := UUID(make([]byte, 16))
 	copy(id, data)
-	*uuid = id
+	*u = id
 	return nil
 }
 
-func (uuid *UUID) Size() int {
-	if uuid == nil {
+func (u *UUID) Size() int {
+	if u == nil {
 		return 0
 	}
-	if len(*uuid) == 0 {
+	if len(*u) == 0 {
 		return 0
 	}
 	return 16
 }
 
-func (uuid UUID) MarshalJSON() ([]byte, error) {
+func (u UUID) MarshalJSON() ([]byte, error) {
 	var buf [36]byte
-	encodeHex(buf[:], uuid)
+	encodeHex(buf[:], u)
 
 	b := make([]byte, 0, 38)
 	b = append(b, '"')
@@ -53,29 +51,18 @@ func (uuid UUID) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
-func (uuid *UUID) UnmarshalJSON(data []byte) error {
+func (u *UUID) UnmarshalJSON(data []byte) error {
 	if len(data) != 38 {
-		errors.New("wrong len")
+		return errors.New("wrong len")
 	}
-	var buf [16]byte
-	decodeHex(data[1:37], buf[:])
-
-	*uuid =  UUID(buf[:])
+	*u = ParseBytes(data[1:37])
 	return nil
 }
 
-func (uuid UUID) Equal(other UUID) bool {
-	return bytes.Equal(uuid, other)
+func (u UUID) Equal(o UUID) bool {
+	return bytes.Equal(u, o)
 }
 
-func (uuid UUID) Compare(other UUID) int {
-	return bytes.Compare(uuid, other)
-}
-
-func decodeHex(src, dst []byte) {
-	hex.Decode(dst[:4], src[:8])
-	hex.Decode(dst[4:6], src[9:13])
-	hex.Decode(dst[6:8], src[14:18])
-	hex.Decode(dst[8:10], src[19:23])
-	hex.Decode(dst[10:], src[24:])
+func (u UUID) Compare(o UUID) int {
+	return bytes.Compare(u, o)
 }
